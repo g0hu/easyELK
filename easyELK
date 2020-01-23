@@ -16,7 +16,7 @@ echo "$(tput setaf 1) ---- Installing theyum-transport-https package ----"
 yum installyum-transport-https
 yum update
 echo "$(tput setaf 1) ---- Saving Repository Definitions ----"
-echo "[elasticsearch]" >> /etc/yum.repo.d/elasticsearch.repo
+echo "[elasticsearch]" > /etc/yum.repo.d/elasticsearch.repo
 echo "name=Elasticsearch repository for 7.x packages" >> /etc/yum.repo.d/elasticsearch.repo
 echo "baseurl=https://artifacts.elastic.co/packages/7.x/yum" >> /etc/yum.repo.d/elasticsearch.repo
 echo "gpgcheck=1" >> /etc/yum.repo.d/elasticsearch.repo
@@ -25,7 +25,7 @@ echo "enabled=0" >> /etc/yum.repo.d/elasticsearch.repo
 echo "autorefresh=1" >> /etc/yum.repo.d/elasticsearch.repo
 echo "type=rpm-md" >> /etc/yum.repo.d/elasticsearch.repo
 
-echo "[kibana-7.x]" >> /etc/yum.repo.d/kibana.repo
+echo "[kibana-7.x]" > /etc/yum.repo.d/kibana.repo
 echo "name=kibana repository for 7.x packages" >> /etc/yum.repo.d/kibana.repo
 echo "baseurl=https://artifacts.elastic.co/packages/7.x/yum" >> /etc/yum.repo.d/kibana.repo
 echo "gpgcheck=1" >> /etc/yum.repo.d/kibana.repo
@@ -34,7 +34,7 @@ echo "enabled=0" >> /etc/yum.repo.d/kibana.repo
 echo "autorefresh=1" >> /etc/yum.repo.d/kibana.repo
 echo "type=rpm-md" >> /etc/yum.repo.d/kibana.repo
 
-echo "[logstash-7.x]" >> /etc/yum.repo.d/logstash.repo
+echo "[logstash-7.x]" > /etc/yum.repo.d/logstash.repo
 echo "name=logstash repository for 7.x packages" >> /etc/yum.repo.d/logstash.repo
 echo "baseurl=https://artifacts.elastic.co/packages/7.x/yum" >> /etc/yum.repo.d/logstash.repo
 echo "gpgcheck=1" >> /etc/yum.repo.d/logstash.repo
