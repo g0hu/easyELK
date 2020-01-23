@@ -12,8 +12,8 @@ yum install openjdk-8-jdk
 # ref: https://www.elastic.co/guide/en/elasticsearch/
 echo "$(tput setaf 1) ---- Setting up public signing key ----"
 rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
-echo "$(tput setaf 1) ---- Installing theyum-transport-https package ----"
-yum installyum-transport-https
+#echo "$(tput setaf 1) ---- Installing theyum-transport-https package ----"
+#yum installyum-transport-https
 yum update
 echo "$(tput setaf 1) ---- Saving Repository Definitions ----"
 echo "[elasticsearch]" > /etc/yum.repo.d/elasticsearch.repo
