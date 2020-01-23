@@ -1,70 +1,121 @@
 #!/bin/bash
-echo "---------------------------------------------------------------" 
-echo " $(date)"
-echo " Starting easyELK Installer "
-echo " ELK Stack for Debian-based Systems "
-echo " Elasticsearch - Logstash - Kibana "
-echo "---------------------------------------------------------------"
-echo " easyELK Status "
-echo ""
-echo " System Update... "
 
-sudo DEBIAN_FRONTEND=noninteractive apt-get -yq update > /dev/null
-sudo DEBIAN_FRONTEND=noninteractive apt-get -yq upgrade > /dev/null
+echo "$(tput setaf 1) ---- Performing upgrade ----"
+yum update -y
+yum upgrade -y
+echo "$(tput setaf 1) ---- Setting Timezone to America/Chicago ----"
+timedatectl set-timezone America/Chicago
+date
+echo "$(tput setaf 1) ---- Installing Java 8 ----"
+yum install openjdk-8-jdk
+# Install Elasticsearch RPM Package 
+# ref: https://www.elastic.co/guide/en/elasticsearch/
+echo "$(tput setaf 1) ---- Setting up public signing key ----"
+rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+echo "$(tput setaf 1) ---- Installing theyum-transport-https package ----"
+yum installyum-transport-https
+yum update
+echo "$(tput setaf 1) ---- Saving Repository Definitions ----"
+echo "[elasticsearch]" >> /etc/yum.repo.d/elasticsearch.repo
+echo "name=Elasticsearch repository for 7.x packages" >> /etc/yum.repo.d/elasticsearch.repo
+echo "baseurl=https://artifacts.elastic.co/packages/7.x/yum" >> /etc/yum.repo.d/elasticsearch.repo
+echo "gpgcheck=1" >> /etc/yum.repo.d/elasticsearch.repo
+echo "gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch" >> /etc/yum.repo.d/elasticsearch.repo
+echo "enabled=0" >> /etc/yum.repo.d/elasticsearch.repo
+echo "autorefresh=1" >> /etc/yum.repo.d/elasticsearch.repo
+echo "type=rpm-md" >> /etc/yum.repo.d/elasticsearch.repo
 
-echo " System Update - Complete "
-echo " Install Java 8... "
+echo "[kibana-7.x]" >> /etc/yum.repo.d/kibana.repo
+echo "name=kibana repository for 7.x packages" >> /etc/yum.repo.d/kibana.repo
+echo "baseurl=https://artifacts.elastic.co/packages/7.x/yum" >> /etc/yum.repo.d/kibana.repo
+echo "gpgcheck=1" >> /etc/yum.repo.d/kibana.repo
+echo "gpgkey=https://artifacts.elastic.co/GPG-KEY-kibana" >> /etc/yum.repo.d/kibana.repo
+echo "enabled=0" >> /etc/yum.repo.d/kibana.repo
+echo "autorefresh=1" >> /etc/yum.repo.d/kibana.repo
+echo "type=rpm-md" >> /etc/yum.repo.d/kibana.repo
 
-# ref: https://computingforgeeks.com/how-to-install-java-8-on-ubuntu/
-sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install openjdk-8-jdk wget > /dev/null
+echo "[logstash-7.x]" >> /etc/yum.repo.d/logstash.repo
+echo "name=logstash repository for 7.x packages" >> /etc/yum.repo.d/logstash.repo
+echo "baseurl=https://artifacts.elastic.co/packages/7.x/yum" >> /etc/yum.repo.d/logstash.repo
+echo "gpgcheck=1" >> /etc/yum.repo.d/logstash.repo
+echo "gpgkey=https://artifacts.elastic.co/GPG-KEY-logstash" >> /etc/yum.repo.d/logstash.repo
+echo "enabled=0" >> /etc/yum.repo.d/logstash.repo
+echo "autorefresh=1" >> /etc/yum.repo.d/logstash.repo
+echo "type=rpm-md" >> /etc/yum.repo.d/logstash.repo
 
-echo " InstallJava 8 - Complete "
-echo " Install Elasticsearch... "
-
-wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-sudo apt-get -yq install apt-transport-https > /dev/null
-echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list > /dev/null
-sudo DEBIAN_FRONTEND=noninteractive apt-get -yq update > /dev/null && sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install elasticsearch > /dev/null
-
-echo " Install Elasticsearch - Complete "
-echo " Installing Kibana... "
-
-sudo DEBIAN_FRONTEND=noninteractive apt-get -yq update > /dev/null && sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install kibana > /dev/null
-
-echo " Install Kibana - Complete "
-echo " Installing Logstash... "
-
-sudo DEBIAN_FRONTEND=noninteractive apt-get -yq update > /dev/null && sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install logstash > /dev/null
-
-echo " Install Logstash - Complete "
-echo " Enabling Services for Start on Boot "
-echo " Starting Elastic, Logstash, Kibana Services "
-
-sudo /bin/systemctl -q daemon-reload > /dev/null
-sudo /bin/systemctl -q enable elasticsearch.service > /dev/null
-sudo /bin/systemctl -q enable logstash.service > /dev/null
-sudo /bin/systemctl -q enable kibana.service > /dev/null
-sudo /bin/systemctl -q start elasticsearch.service > /dev/null
-sudo /bin/systemctl -q start logstash.service > /dev/null
-sudo /bin/systemctl -q start kibana.service > /dev/null
-
-echo " Service Status: "
-function checkIt()
-{
- ps auxw | grep -P '\b'$1'(?!-)\b' >/dev/null
- if [ $? != 0 ]
- then
-   echo $1" Not Running";
- else
-   echo $1" Running";
- fi;
-}
-
-checkIt "   elasticsearch"
-checkIt "   logstash"
-checkIt "   kibana"
-
-echo " $(date)"
-echo " Finished easyELK Installer"
-echo " Your Turn: Finish Configuration "
-echo "---------------------------------------------------------------"
+echo "$(tput setaf 1) ---- Installing the Elasticsearch RPM Package ----"
+yum install --enablerepo=elasticsearch elasticsearch
+echo "$(tput setaf 1) ---- Installing the Kibana RPM Package ----"
+yum install kibana
+echo "$(tput setaf 1) ---- Installing Logstash ----"
+yum install logstash
+echo "$(tput setaf 1) ---- Installing Filebeat ----"
+curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.5.2-x86_64.rpm
+rpm -vi filebeat-7.5.2-x86_64.rpm
+rm filebeat*
+filebeat modules enable system
+filebeat modules enable cisco
+filebeat modules enable netflow
+filebeat modules enable osquery
+filebeat modules enable elasticsearch
+filebeat modules enable kibana
+filebeat modules enable logstash
+echo "$(tput setaf 1) ---- Installing Metricbeat ----"
+curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.5.2-x86_64.rpm
+rpm -i metricbeat-7.5.2-x86_64.rpm
+rm metricbeat*
+metricbeat modules enable elasticsearch
+metricbeat modules enable kibana
+metricbeat modules enable logstash
+metricbeat modules enable system
+echo "$(tput setaf 1) ---- Installing Packetbeat ----"
+yum install libpcap0.8
+curl -L -O https://artifacts.elastic.co/downloads/beats/packetbeat/packetbeat-7.5.2-x86_64.rpm
+rpm -i packetbeat-7.5.2-x86_64.rpm
+rm packetbeat*
+echo "$(tput setaf 1) ---- Installing Auditbeat ----"
+curl -L -O https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-7.5.2-x86_64.rpm
+rpm -i auditbeat-7.5.2-x86_64.rpm
+rm auditbeat*
+echo "$(tput setaf 1) ---- Starting Elasticsearch ----"
+/bin/systemctl daemon-reload
+/bin/systemctl enable elasticsearch.service
+/bin/systemctl start elasticsearch.service
+echo "$(tput setaf 1) ---- Starting Kibana ----"
+/bin/systemctl enable kibana.service
+/bin/systemctl start kibana.service
+echo "$(tput setaf 1) ---- Starting Logstash ----"
+/bin/systemctl enable logstash.service
+/bin/systemctl start logstash.service
+echo "$(tput setaf 1) ---- Starting Filebeat ----"
+systemctl enable filebeat
+systemctl start filebeat
+ilebeat setup -e
+filebeat setup --dashboards
+filebeat setup --index-management
+filebeat setup --pipelines
+echo "$(tput setaf 1) ---- Starting Metricbeat ----"
+systemctl enable metricbeat
+systemctl start metricbeat
+metricbeat setup -e
+metricbeat setup --dashboards
+metricbeat setup --index-management
+metricbeat setup --pipelines
+echo "$(tput setaf 1) ---- Starting Packetbeat ----"
+systemctl enable packetbeat
+systemctl start packetbeat
+packetbeat setup -e
+packetbeat setup --dashboards
+packetbeat setup --index-management
+packetbeat setup --pipelines
+echo "$(tput setaf 1) ---- Starting Auditbeat ----"
+systemctl enable auditbeat
+systemctl start auditbeat
+auditbeat setup -e
+auditbeat setup --dashboards
+auditbeat setup --index-management
+auditbeat setup --pipelines
+echo "$(tput setaf 1) ---- Now It's Your Turn: Finsh Configuration ----"
+echo "$(tput setaf 3) 1. edit kibana.yml and change server.host to 0.0.0.0 so that you can connect to kibana from other systems http://IPADDRESS:5601"
+echo "$(tput setaf 3) 2. edit elasticsearch.yml and change network.host to 0.0.0.0 so that other systems can send data to elasticsearch"
+echo "$(tput setaf 3) 3. restart both services  systemctl restart elasticsearch kibana"
