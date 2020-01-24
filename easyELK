@@ -1,4 +1,4 @@
-##!/bin/bash
+#!/bin/bash
 
 echo "$(tput setaf 1) ---- Performing upgrade ----"
 yum update -y
@@ -7,13 +7,13 @@ echo "$(tput setaf 1) ---- Setting Timezone to America/Chicago ----"
 timedatectl set-timezone America/Chicago
 date
 echo "$(tput setaf 1) ---- Installing Java 8 ----"
-yum install openjdk-8-jdk
+yum install java-1.8.0-openjdk
 # Install Elasticsearch RPM Package 
 # ref: https://www.elastic.co/guide/en/elasticsearch/
 echo "$(tput setaf 1) ---- Setting up public signing key ----"
 rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
 #echo "$(tput setaf 1) ---- Installing theyum-transport-https package ----"
-#yum installyum-transport-https
+yum install transport-https
 yum update
 echo "$(tput setaf 1) ---- Saving Repository Definitions ----"
 echo "[elasticsearch]" > /etc/yum.repos.d/elasticsearch.repo
@@ -21,7 +21,7 @@ echo "name=Elasticsearch repository for 7.x packages" >> /etc/yum.repos.d/elasti
 echo "baseurl=https://artifacts.elastic.co/packages/7.x/yum" >> /etc/yum.repos.d/elasticsearch.repo
 echo "gpgcheck=1" >> /etc/yum.repos.d/elasticsearch.repo
 echo "gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch" >> /etc/yum.repos.d/elasticsearch.repo
-echo "enabled=0" >> /etc/yum.repos.d/elasticsearch.repo
+echo "enabled=1" >> /etc/yum.repos.d/elasticsearch.repo
 echo "autorefresh=1" >> /etc/yum.repos.d/elasticsearch.repo
 echo "type=rpm-md" >> /etc/yum.repos.d/elasticsearch.repo
 
@@ -30,7 +30,7 @@ echo "name=kibana repository for 7.x packages" >> /etc/yum.reposs.d/kibana.repo
 echo "baseurl=https://artifacts.elastic.co/packages/7.x/yum" >> /etc/yum.repos.d/kibana.repo
 echo "gpgcheck=1" >> /etc/yum.repos.d/kibana.repo
 echo "gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch" >> /etc/yum.repos.d/kibana.repo
-echo "enabled=0" >> /etc/yum.repos.d/kibana.repo
+echo "enabled=1" >> /etc/yum.repos.d/kibana.repo
 echo "autorefresh=1" >> /etc/yum.repos.d/kibana.repo
 echo "type=rpm-md" >> /etc/yum.repos.d/kibana.repo
 
@@ -39,7 +39,7 @@ echo "name=logstash repository for 7.x packages" >> /etc/yum.repos.d/logstash.re
 echo "baseurl=https://artifacts.elastic.co/packages/7.x/yum" >> /etc/yum.repos.d/logstash.repo
 echo "gpgcheck=1" >> /etc/yum.repos.d/logstash.repo
 echo "gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch" >> /etc/yum.repos.d/logstash.repo
-echo "enabled=0" >> /etc/yum.repos.d/logstash.repo
+echo "enabled=1" >> /etc/yum.repos.d/logstash.repo
 echo "autorefresh=1" >> /etc/yum.repos.d/logstash.repo
 echo "type=rpm-md" >> /etc/yum.repos.d/logstash.repo
 
@@ -77,11 +77,9 @@ echo "$(tput setaf 1) ---- Installing Auditbeat ----"
 curl -L -O https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-7.5.2-x86_64.rpm
 rpm -i auditbeat-7.5.2-x86_64.rpm
 rm auditbeat*
-
-# ------------------------ Below this starts shit, no use --------------------------------
 echo "$(tput setaf 1) ---- Starting Elasticsearch ----"
 #service daemon-reload
-service elasticsearch  start
+service elasticsearch start
 echo "$(tput setaf 1) ---- Starting Kibana ----"
 service kibana  start
 echo "$(tput setaf 1) ---- Starting Logstash ----"
