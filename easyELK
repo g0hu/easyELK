@@ -1,4 +1,4 @@
-#!/bin/bash
+##!/bin/bash
 
 echo "$(tput setaf 1) ---- Performing upgrade ----"
 yum update -y
@@ -26,11 +26,11 @@ echo "autorefresh=1" >> /etc/yum.repos.d/elasticsearch.repo
 echo "type=rpm-md" >> /etc/yum.repos.d/elasticsearch.repo
 
 echo "[kibana-7.x]" > /etc/yum.repos.d/kibana.repo
-echo "name=Kibana repository for 7.x packages" >> /etc/yum.repos.d/kibana.repo
+echo "name=kibana repository for 7.x packages" >> /etc/yum.reposs.d/kibana.repo
 echo "baseurl=https://artifacts.elastic.co/packages/7.x/yum" >> /etc/yum.repos.d/kibana.repo
 echo "gpgcheck=1" >> /etc/yum.repos.d/kibana.repo
 echo "gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch" >> /etc/yum.repos.d/kibana.repo
-echo "enabled=1" >> /etc/yum.repos.d/kibana.repo
+echo "enabled=0" >> /etc/yum.repos.d/kibana.repo
 echo "autorefresh=1" >> /etc/yum.repos.d/kibana.repo
 echo "type=rpm-md" >> /etc/yum.repos.d/kibana.repo
 
@@ -39,7 +39,7 @@ echo "name=logstash repository for 7.x packages" >> /etc/yum.repos.d/logstash.re
 echo "baseurl=https://artifacts.elastic.co/packages/7.x/yum" >> /etc/yum.repos.d/logstash.repo
 echo "gpgcheck=1" >> /etc/yum.repos.d/logstash.repo
 echo "gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch" >> /etc/yum.repos.d/logstash.repo
-echo "enabled=1" >> /etc/yum.repos.d/logstash.repo
+echo "enabled=0" >> /etc/yum.repos.d/logstash.repo
 echo "autorefresh=1" >> /etc/yum.repos.d/logstash.repo
 echo "type=rpm-md" >> /etc/yum.repos.d/logstash.repo
 
@@ -69,7 +69,7 @@ metricbeat modules enable kibana
 metricbeat modules enable logstash
 metricbeat modules enable system
 echo "$(tput setaf 1) ---- Installing Packetbeat ----"
-yum install libpcap0.8
+yum install libpcap
 curl -L -O https://artifacts.elastic.co/downloads/beats/packetbeat/packetbeat-7.5.2-x86_64.rpm
 rpm -i packetbeat-7.5.2-x86_64.rpm
 rm packetbeat*
@@ -77,40 +77,35 @@ echo "$(tput setaf 1) ---- Installing Auditbeat ----"
 curl -L -O https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-7.5.2-x86_64.rpm
 rpm -i auditbeat-7.5.2-x86_64.rpm
 rm auditbeat*
+
+# ------------------------ Below this starts shit, no use --------------------------------
 echo "$(tput setaf 1) ---- Starting Elasticsearch ----"
-/bin/systemctl daemon-reload
-/bin/systemctl enable elasticsearch.service
-/bin/systemctl start elasticsearch.service
+#service daemon-reload
+service elasticsearch  start
 echo "$(tput setaf 1) ---- Starting Kibana ----"
-/bin/systemctl enable kibana.service
-/bin/systemctl start kibana.service
+service kibana  start
 echo "$(tput setaf 1) ---- Starting Logstash ----"
-/bin/systemctl enable logstash.service
-/bin/systemctl start logstash.service
+service logstash start
 echo "$(tput setaf 1) ---- Starting Filebeat ----"
-systemctl enable filebeat
-systemctl start filebeat
+service filebeat start
 ilebeat setup -e
 filebeat setup --dashboards
 filebeat setup --index-management
 filebeat setup --pipelines
 echo "$(tput setaf 1) ---- Starting Metricbeat ----"
-systemctl enable metricbeat
-systemctl start metricbeat
+service metricbeat start
 metricbeat setup -e
 metricbeat setup --dashboards
 metricbeat setup --index-management
 metricbeat setup --pipelines
 echo "$(tput setaf 1) ---- Starting Packetbeat ----"
-systemctl enable packetbeat
-systemctl start packetbeat
+service packetbeat start
 packetbeat setup -e
 packetbeat setup --dashboards
 packetbeat setup --index-management
 packetbeat setup --pipelines
 echo "$(tput setaf 1) ---- Starting Auditbeat ----"
-systemctl enable auditbeat
-systemctl start auditbeat
+service auditbeat start
 auditbeat setup -e
 auditbeat setup --dashboards
 auditbeat setup --index-management
@@ -118,4 +113,4 @@ auditbeat setup --pipelines
 echo "$(tput setaf 1) ---- Now It's Your Turn: Finsh Configuration ----"
 echo "$(tput setaf 3) 1. edit kibana.yml and change server.host to 0.0.0.0 so that you can connect to kibana from other systems http://IPADDRESS:5601"
 echo "$(tput setaf 3) 2. edit elasticsearch.yml and change network.host to 0.0.0.0 so that other systems can send data to elasticsearch"
-echo "$(tput setaf 3) 3. restart both services  systemctl restart elasticsearch kibana"
+echo "$(tput setaf 3) 3. restart both services  service restart elasticsearch kibana"
